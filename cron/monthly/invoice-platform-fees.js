@@ -20,7 +20,7 @@ const date = process.env.START_DATE ? moment.utc(process.env.START_DATE) : momen
 const DRY = process.env.DRY;
 const HOST_ID = process.env.HOST_ID;
 const isProduction = config.env === 'production';
-if (isProduction && date.date() !== 5 && !process.env.OFFCYCLE) {
+if (isProduction && date.date() !== 5 && !process.env.OFFCYCLE && !DRY) {
   console.log('OC_ENV is production and today is not the 5th of month, script aborted!');
   process.exit();
 }
@@ -327,24 +327,23 @@ export async function run() {
       'amount',
     );
     const totalAmountCharged = sumBy(items, 'amount');
-    if (totalAmountCharged < 1000) {
-      console.warn(
-        `${HostName} (#${hostId}) skipped, total amound pending ${totalAmountCharged / 100} < 10.00 ${currency}.\n`,
-      );
-      continue;
-    }
+
     console.info(
       `${HostName} (#${hostId}) has ${transactions.length} pending transactions and owes ${
         totalAmountCharged / 100
       } (${currency})`,
     );
-    if (DRY) {
-      console.debug(`Items:\n${json2csv(items)}\n`);
-    }
+    console.debug(`Items:\n${json2csv(items)}\n`);
 
     if (!DRY) {
       if (!chargedHostId) {
         console.error(`Warning: We don't have a way to submit the expense to ${HostName}, ignoring.\n`);
+        continue;
+      }
+      if (totalAmountCharged < 1000) {
+        console.warn(
+          `${HostName} (#${hostId}) skipped, total amound pending ${totalAmountCharged / 100} < 10.00 ${currency}.\n`,
+        );
         continue;
       }
       // Credit the Host with platform tips collected during the month
