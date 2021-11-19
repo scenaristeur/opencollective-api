@@ -81,7 +81,7 @@ const recordTransaction = async (order, amount, currency, paypalFee, payload) =>
   const paymentProcessorFeeInHostCurrency = Math.round(hostCurrencyFxRate * paypalFee);
 
   const hostFee = await getHostFee(order, host);
-  const hostFeeInHostCurrency = Math.round(hostFee, hostCurrencyFxRate);
+  const hostFeeInHostCurrency = Math.round(hostFee * hostCurrencyFxRate);
 
   const platformTipEligible = await isPlatformTipEligible(order, host);
   const platformTip = getPlatformTip(order);
