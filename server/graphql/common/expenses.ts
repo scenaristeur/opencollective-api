@@ -701,6 +701,7 @@ type ExpenseData = {
   amount?: number;
   description?: string;
   currency?: string;
+  isRecurring?: boolean;
 };
 
 export async function createExpense(
@@ -818,7 +819,7 @@ export async function createExpense(
         PayoutMethodId: payoutMethod && payoutMethod.id,
         legacyPayoutMethod: models.Expense.getLegacyPayoutMethodTypeFromPayoutMethod(payoutMethod),
         amount: expenseData.amount || getTotalAmountFromItems(itemsData),
-        data: { recipient },
+        data: { recipient, isRecurring: expenseData.isRecurring },
       },
       { transaction: t },
     );

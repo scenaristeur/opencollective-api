@@ -244,6 +244,14 @@ function defineModel() {
         },
         validate: { validateTags },
       },
+
+      RecurringExpenseId: {
+        type: DataTypes.INTEGER,
+        references: { key: 'id', model: 'RecurringExpense' },
+        onDelete: 'SET NULL',
+        onUpdate: 'CASCADE',
+        allowNull: true,
+      },
     },
     {
       paranoid: true,

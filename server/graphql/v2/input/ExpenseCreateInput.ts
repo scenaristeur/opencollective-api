@@ -1,4 +1,4 @@
-import { GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLString } from 'graphql';
+import { GraphQLBoolean, GraphQLInputObjectType, GraphQLList, GraphQLNonNull, GraphQLString } from 'graphql';
 
 import { Currency } from '../enum';
 import { ExpenseType } from '../enum/ExpenseType';
@@ -62,6 +62,9 @@ export const ExpenseCreateInput = new GraphQLInputObjectType({
     payeeLocation: {
       type: LocationInput,
       description: 'The address of the payee',
+    },
+    isRecurring: {
+      type: GraphQLBoolean,
     },
   }),
 });
