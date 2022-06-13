@@ -7,8 +7,8 @@ import models from '.';
 export enum TokenType {
   OAUTH = 'OAUTH',
 }
-class UserToken extends Model<InferAttributes<UserToken>, InferCreationAttributes<UserToken>> {
-  public declare id: CreationOptional<number>;
+class UserToken extends Model<UserTokenAttributes, UserTokenCreateAttributes> implements UserTokenAttributes {
+  public declare id: number;
   public declare type: 'OAUTH';
   public declare accessToken: string;
   public declare accessTokenExpiresAt: Date;
@@ -17,12 +17,11 @@ class UserToken extends Model<InferAttributes<UserToken>, InferCreationAttribute
   public declare ApplicationId: number;
   public declare UserId: number;
   public declare data: Record<string, unknown>;
-  public declare createdAt: CreationOptional<Date>;
-  public declare updatedAt: CreationOptional<Date>;
-  public declare deletedAt: CreationOptional<Date>;
-
-  public declare user?: NonAttribute<typeof models.User>;
-  public declare client?: NonAttribute<typeof models.Application>;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt?: Date;
+  public declare user: typeof models.User;
+  public declare client: typeof models.Application;
 }
 
 UserToken.init(

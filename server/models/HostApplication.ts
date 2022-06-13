@@ -12,17 +12,27 @@ export enum HostApplicationStatus {
   EXPIRED = 'EXPIRED',
 }
 
-export class HostApplication extends Model<InferAttributes<HostApplication>, InferCreationAttributes<HostApplication>> {
-  public declare readonly id: CreationOptional<number>;
+interface HostApplicationCreationAttributes {
+  CollectiveId: number;
+  HostCollectiveId: number;
+  status: HostApplicationStatus;
+  customData?: Record<string, unknown> | null;
+  message?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  deletedAt?: Date | null;
+}
+
+export class HostApplication extends Model<HostApplication, HostApplicationCreationAttributes> {
+  public declare readonly id: number;
   public declare CollectiveId: number;
   public declare HostCollectiveId: number;
-  public CreatedByUserId: number;
   public declare status: HostApplicationStatus;
   public declare customData: Record<string, unknown> | null;
   public declare message: string;
-  public declare createdAt: CreationOptional<Date>;
-  public declare updatedAt: CreationOptional<Date>;
-  public declare deletedAt: CreationOptional<Date>;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt: Date | null;
 
   // ---- Static ----
 

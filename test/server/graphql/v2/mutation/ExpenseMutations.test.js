@@ -425,6 +425,7 @@ describe('server/graphql/v2/mutation/ExpenseMutations', () => {
       };
 
       const result = await graphqlQueryV2(editExpenseMutation, { expense: updatedExpenseData }, expense.User);
+      result.errors && console.error(result.errors);
       expect(result.errors).to.not.exist;
       const returnedItems = result.data.editExpense.items;
       const sumItems = returnedItems.reduce((total, item) => total + item.amount, 0);

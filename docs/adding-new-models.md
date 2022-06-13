@@ -52,15 +52,28 @@ module.exports = {
 Example: `server/models/MyTable.ts`
 
 ```ts
-import type { CreationOptional, InferAttributes, InferCreationAttributes } from 'sequelize';
 import sequelize, { DataTypes, Model } from '../lib/sequelize';
 
-class MyTable extends Model<InferAttributes<MyTable>, InferCreationAttributes<MyTable>> {
-  declare id: CreationOptional<number>;
+// Define all attributes for the model
+interface MyTableAttributes {
+  id: number;
+  MyCollectiveId: number;
+  createdAt: Date;
+  updatedAt: Date;
+  deletedAt: Date;
+}
+
+// Define attributes that can be used for model creation
+interface MyTableCreateAttributes {
+  MyCollectiveId: number;
+}
+
+class MyTable extends Model<MyTableAttributes, MyTableCreateAttributes> implements MyTableAttributes {
+  declare id: number;
   declare MyCollectiveId: number;
-  declare createdAt: CreationOptional<Date>;
-  declare updatedAt: CreationOptional<Date>;
-  declare deletedAt: CreationOptional<Date>;
+  declare createdAt: Date;
+  declare updatedAt: Date;
+  declare deletedAt: Date;
 }
 
 MyTable.init(

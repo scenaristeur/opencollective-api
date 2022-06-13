@@ -1,5 +1,3 @@
-import type { InferAttributes } from 'sequelize';
-
 import sequelize, { DataTypes, Model } from '../lib/sequelize';
 
 import { PaypalProductCreateAttributes } from './PaypalProduct';
@@ -21,7 +19,7 @@ interface PaypalPlanCreateWithProductAttributes extends PaypalPlanCommonCreateAt
 
 type PaypalPlanCreateAttributes = PaypalPlanCreateWithProductIdAttributes | PaypalPlanCreateWithProductAttributes;
 
-class PaypalPlan extends Model<InferAttributes<PaypalPlan>, PaypalPlanCreateAttributes> {
+class PaypalPlan extends Model<PaypalPlanAttributes, PaypalPlanCreateAttributes> implements PaypalPlanAttributes {
   public declare id: string;
   public declare ProductId: string;
   public declare currency: string;

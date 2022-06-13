@@ -3,44 +3,59 @@ import { DataTypes, Model, Transaction } from 'sequelize';
 
 import { diffDBEntries } from '../lib/data';
 import { isValidUploadedImage } from '../lib/images';
-import restoreSequelizeAttributesOnClass from '../lib/restore-sequelize-attributes-on-class';
 import { buildSanitizerOptions, sanitizeHTML } from '../lib/sanitize-html';
 import sequelize from '../lib/sequelize';
 
 import models from '.';
 
+// An array like [newItemsData, removedItems, updatedItemsData]
+export type ItemsDiff = [Record<string, unknown>[], ExpenseItem[], Record<string, unknown>[]];
+
 /**
  * Sequelize model to represent an ExpenseItem, linked to the `ExpenseItems` table.
  */
 export class ExpenseItem extends Model {
-  public readonly id!: number;
-  public ExpenseId!: number;
-  public CreatedByUserId!: number;
-  public amount!: number;
-  public url!: string;
-  public createdAt!: Date;
-  public updatedAt!: Date;
-  public deletedAt: Date;
-  public incurredAt!: Date;
-  public description: string;
+  public declare readonly id: number;
+  public declare ExpenseId: number;
+  public declare CreatedByUserId: number;
+  public declare amount: number;
+  public declare url: string;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt: Date;
+  public declare incurredAt: Date;
+  public declare description: string;
 
   private static editableFields = ['amount', 'url', 'description', 'incurredAt'];
-
-  constructor(...args) {
-    super(...args);
-    restoreSequelizeAttributesOnClass(new.target, this);
-  }
 
   /**
    * Based on `diffDBEntries`, diff two items list to know which ones where
    * added, removed or added.
    * @returns [newEntries, removedEntries, updatedEntries]
    */
-  static diffDBEntries = (
-    baseItems: ExpenseItem[],
-    itemsData: Record<string, unknown>[],
-  ): [Record<string, unknown>[], ExpenseItem[], Record<string, unknown>[]] => {
+  static diffDBEntries = (baseItems: ExpenseItem[], itemsData: Record<string, unknown>[]): ItemsDiff => {
     return diffDBEntries(baseItems, itemsData, ExpenseItem.editableFields);
+  };
+
+  /**
+   * Simulate a diff on a list of existing items, returns a list of items data as we would expect to find it
+   * once recorded in the DB.
+   */
+  static simulateItemsDiff = (items: ExpenseItem[], diff: ItemsDiff): Record<string, unknown>[] => {
+    const [newItems, removedItems, updatedItems] = diff;
+    return (
+      items
+        // Remove items that were removed
+        .filter(item => !removedItems.some(removedItem => removedItem.id === item.id))
+        // Update (or keep it the same if not in updatedItems)
+        .map(item => {
+          const existingValues = item['dataValues'];
+          const updatedItemData = updatedItems.find(updatedItem => updatedItem.id === item.id);
+          return updatedItemData ? { ...existingValues, ...updatedItemData } : existingValues;
+        })
+        // Add new
+        .concat(newItems)
+    );
   };
 
   /**
@@ -53,7 +68,7 @@ export class ExpenseItem extends Model {
     itemData: Record<string, unknown>,
     user: typeof models.User,
     expense: typeof models.Expense,
-    dbTransaction: Transaction | null,
+    dbTransaction: Transaction | null = null,
   ): Promise<ExpenseItem> {
     const cleanData = ExpenseItem.cleanData(itemData);
     return ExpenseItem.create(

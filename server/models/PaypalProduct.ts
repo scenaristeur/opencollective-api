@@ -1,4 +1,4 @@
-import { InferAttributes } from 'sequelize';
+import sequelize, { DataTypes, Model } from '../lib/sequelize';
 
 import sequelize, { DataTypes, Model } from '../lib/sequelize';
 
@@ -8,7 +8,10 @@ export interface PaypalProductCreateAttributes {
   CollectiveId: number;
 }
 
-class PaypalProduct extends Model<InferAttributes<PaypalProduct>, PaypalProductCreateAttributes> {
+class PaypalProduct
+  extends Model<PaypalProductAttributes, PaypalProductCreateAttributes>
+  implements PaypalProductAttributes
+{
   public declare id: string;
   public declare CollectiveId: number;
   public declare TierId: number;

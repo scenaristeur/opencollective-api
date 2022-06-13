@@ -14,17 +14,16 @@ export function diffDBEntries<T extends Model<T>>(
   oldEntries: T[],
   newEntriesData: Record<string, unknown>[],
   diffedFields: string[],
-  idField = 'id',
 ): [Record<string, unknown>[], T[], Record<string, unknown>[]] {
-  const toRemove = differenceBy(oldEntries, newEntriesData, idField);
+  const toRemove = differenceBy(oldEntries, newEntriesData, 'id');
   const toCreate = [];
   const toUpdate = [];
 
   newEntriesData.forEach(entry => {
-    if (!entry[idField]) {
+    if (!entry['id']) {
       toCreate.push(entry);
     } else {
-      const existingEntry = oldEntries.find(oldEntry => oldEntry.get(idField) === entry[idField]);
+      const existingEntry = oldEntries.find(oldEntry => oldEntry.get('id') === entry['id']);
       // We throw here to protect against security issues where users would try
       // to update an entry that doesn't exist in `oldEntries`. Example: trying
       // to update an existing member that's part of another collective.

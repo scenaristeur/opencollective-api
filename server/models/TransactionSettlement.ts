@@ -33,7 +33,26 @@ class TransactionSettlement extends Model<
   public declare updatedAt: CreationOptional<Date>;
   public declare deletedAt: CreationOptional<Date>;
 
-  public declare getExpense: BelongsToGetAssociationMixin<typeof models.Expense>;
+interface TransactionSettlementCreateAttributes {
+  TransactionGroup: string;
+  kind: TransactionKind;
+  status: TransactionSettlementStatus;
+  ExpenseId?: number;
+}
+
+class TransactionSettlement
+  extends Model<TransactionSettlementAttributes, TransactionSettlementCreateAttributes>
+  implements TransactionSettlementAttributes
+{
+  public declare TransactionGroup: string;
+  public declare kind: TransactionKind;
+  public declare status: TransactionSettlementStatus;
+  public declare ExpenseId: number;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt: Date;
+
+  public getExpense!: BelongsToGetAssociationMixin<typeof models.Expense>;
 
   // ---- Static methods ----
 

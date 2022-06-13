@@ -1,5 +1,3 @@
-import { CreationOptional, InferAttributes, InferCreationAttributes, NonAttribute } from 'sequelize';
-
 import sequelize, { DataTypes, Model } from '../lib/sequelize';
 
 import models from '.';
@@ -19,8 +17,27 @@ class OAuthAuthorizationCode extends Model<
   public declare ApplicationId: number;
   public declare UserId: number;
 
-  public declare application?: NonAttribute<typeof models.Application>;
-  public declare user?: NonAttribute<typeof models.User>;
+// Define all attributes for the model
+interface OAuthAuthorizationCodeAttributes extends OAuthAuthorizationCodeCreateAttributes {
+  id: number;
+}
+
+class OAuthAuthorizationCode
+  extends Model<OAuthAuthorizationCodeAttributes, OAuthAuthorizationCodeCreateAttributes>
+  implements OAuthAuthorizationCodeAttributes
+{
+  public declare id: number;
+  public declare code: string;
+  public declare redirectUri: string;
+  public declare expiresAt: Date;
+  public declare data: Record<string, unknown>;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt?: Date;
+  public declare ApplicationId: number;
+  public declare UserId: number;
+  public declare application: typeof models.Application;
+  public declare user: typeof models.User;
 }
 
 OAuthAuthorizationCode.init(

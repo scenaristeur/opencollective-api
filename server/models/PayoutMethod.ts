@@ -39,12 +39,12 @@ export type PayoutMethodDataType =
 /**
  * Sequelize model to represent an PayoutMethod, linked to the `PayoutMethods` table.
  */
-export class PayoutMethod extends Model<InferAttributes<PayoutMethod>, InferCreationAttributes<PayoutMethod>> {
-  public declare readonly id: CreationOptional<number>;
+export class PayoutMethod extends Model {
+  public declare readonly id: number;
   public declare type: PayoutMethodTypes;
-  public declare createdAt: CreationOptional<Date>;
-  public declare updatedAt: CreationOptional<Date>;
-  public declare deletedAt: CreationOptional<Date>;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt: Date;
   public declare name: string;
   public declare isSaved: boolean;
   public declare CollectiveId: number;

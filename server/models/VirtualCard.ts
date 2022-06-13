@@ -27,10 +27,41 @@ class VirtualCard extends Model<InferAttributes<VirtualCard>, InferCreationAttri
   public declare updatedAt: CreationOptional<Date>;
   public declare deletedAt: CreationOptional<Date>;
 
+export interface VirtualCardCreateAttributes {
+  id: string;
+  name: string;
+  last4: string;
+  data: Record<string, any>;
+  privateData: Record<string, any>;
+  CollectiveId: number;
+  HostCollectiveId: number;
+  UserId?: number;
+  provider: VirtualCardProviders;
+  spendingLimitAmount: number;
+  spendingLimitInterval: string;
+  currency?: string;
+}
+
+class VirtualCard extends Model<VirtualCardAttributes, VirtualCardCreateAttributes> implements VirtualCardAttributes {
+  public declare id: string;
+  public declare CollectiveId: number;
+  public declare HostCollectiveId: number;
+  public declare UserId: number;
+  public declare name: string;
+  public declare last4: string;
+  public declare data: Record<string, any>;
+  public declare privateData: string | Record<string, any>;
+  public declare provider: VirtualCardProviders;
+  public declare spendingLimitAmount: number;
+  public declare spendingLimitInterval: string;
+  public declare currency: string;
+  public declare createdAt: Date;
+  public declare updatedAt: Date;
+  public declare deletedAt: Date;
   // Associations
-  public declare collective?: NonAttribute<any>;
-  public declare host?: NonAttribute<any>;
-  public declare user?: NonAttribute<any>;
+  public declare collective?: any;
+  public declare host?: any;
+  public declare user?: any;
 
   async getExpensesMissingDetails(): Promise<Array<any>> {
     return sequelize.models.Expense.findPendingCardCharges({

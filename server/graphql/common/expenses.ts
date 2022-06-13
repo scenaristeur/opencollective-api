@@ -29,7 +29,7 @@ import { canUseFeature } from '../../lib/user-permissions';
 import { formatCurrency } from '../../lib/utils';
 import models, { sequelize } from '../../models';
 import { ExpenseAttachedFile } from '../../models/ExpenseAttachedFile';
-import { ExpenseItem } from '../../models/ExpenseItem';
+import { ExpenseItem, ItemsDiff } from '../../models/ExpenseItem';
 import { PayoutMethodTypes } from '../../models/PayoutMethod';
 import paymentProviders from '../../paymentProviders';
 import {
@@ -955,15 +955,13 @@ export const changesRequireStatusUpdate = (
 export const getItemsChanges = async (
   existingItems: ExpenseItem[],
   expenseData: ExpenseData,
-): Promise<
-  [boolean, Record<string, unknown>[], [Record<string, unknown>[], ExpenseItem[], Record<string, unknown>[]]]
-> => {
+): Promise<[boolean, ItemsDiff]> => {
   if (expenseData.items) {
     const itemsDiff = models.ExpenseItem.diffDBEntries(existingItems, expenseData.items);
     const hasItemChanges = flatten(<unknown[]>itemsDiff).length > 0;
-    return [hasItemChanges, expenseData.items, itemsDiff];
+    return [hasItemChanges, itemsDiff];
   } else {
-    return [false, [], [[], [], []]];
+    return [false, [[], [], []]];
   }
 };
 
@@ -1021,7 +1019,7 @@ export async function editExpense(
     ],
   });
 
-  const [hasItemChanges, itemsData, itemsDiff] = await getItemsChanges(expense.items, expenseData);
+  const [hasItemChanges, itemsDiff] = await getItemsChanges(expense.items, expenseData);
   const taxes = expenseData.tax || expense.data?.taxes || [];
   const expenseType = expenseData.type || expense.type;
   checkTaxes(expense.collective, expense.collective.host, expenseType, taxes);
@@ -1119,11 +1117,13 @@ export async function editExpense(
 
     // Update items
     if (hasItemChanges) {
-      checkExpenseItems({ ...expense.dataValues, ...cleanExpenseData }, itemsData, taxes);
-      const [newItemsData, oldItems, itemsToUpdate] = itemsDiff;
+      const simulatedItems = ExpenseItem.simulateItemsDiff(expense.items, itemsDiff);
+      checkExpenseItems({ ...expense.dataValues, ...cleanExpenseData }, simulatedItems, taxes);
+      // TODO: Move the code below to ExpenseItem.applyItemsDiff
+      const [newItemsData, removedItems, itemsToUpdate] = itemsDiff;
       await Promise.all(<Promise<void>[]>[
         // Delete
-        ...oldItems.map(item => {
+        ...removedItems.map(item => {
           return item.destroy({ transaction: t });
         }),
         // Create
@@ -1135,6 +1135,8 @@ export async function editExpense(
           return models.ExpenseItem.updateFromData(itemData, t);
         }),
       ]);
+
+      expense.items = await expense.getItems({ transaction: t });
     }
 
     // Update expense
@@ -1155,10 +1157,13 @@ export async function editExpense(
       );
 
       await createAttachedFiles(expense, newAttachedFiles, remoteUser, t);
-      await Promise.all(removedAttachedFiles.map((file: ExpenseAttachedFile) => file.destroy()));
+      await Promise.all(removedAttachedFiles.map((file: ExpenseAttachedFile) => file.destroy({ transaction: t })));
       await Promise.all(
         updatedAttachedFiles.map((file: Record<string, unknown>) =>
-          models.ExpenseAttachedFile.update({ url: file.url }, { where: { id: file.id, ExpenseId: expense.id } }),
+          models.ExpenseAttachedFile.update(
+            { url: file.url },
+            { where: { id: file.id, ExpenseId: expense.id }, transaction: t },
+          ),
         ),
       );
     }
@@ -1173,7 +1178,7 @@ export async function editExpense(
     const updatedExpenseProps = {
       ...cleanExpenseData,
       data: !expense.data ? null : cloneDeep(expense.data),
-      amount: computeTotalAmountForExpense(expenseData.items || expense.items, taxes),
+      amount: computeTotalAmountForExpense(expense.items, taxes),
       lastEditedById: remoteUser.id,
       incurredAt: expenseData.incurredAt || new Date(),
       status,
