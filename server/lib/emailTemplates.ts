@@ -53,6 +53,7 @@ export const templateNames = [
   'host.application.contact',
   'host.report',
   'member.invitation',
+  'oauth.application.authorized',
   'onboarding.day2',
   'onboarding.day2.foundation',
   'onboarding.day2.opensource',

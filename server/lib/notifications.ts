@@ -375,6 +375,10 @@ const populateCommentActivity = async activity => {
 async function notifyByEmail(activity: Activity) {
   debug('notifyByEmail', activity.type);
   switch (activity.type) {
+    case ActivityTypes.OAUTH_APPLICATION_AUTHORIZED:
+      notifyUserId(activity.UserId, activity);
+      break;
+
     case ActivityTypes.ORDER_PROCESSING:
       notifyUserId(activity.UserId, activity, {
         from: `${activity.data.collective.name} <no-reply@${activity.data.collective.slug}.opencollective.com>`,
