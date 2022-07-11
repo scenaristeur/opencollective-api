@@ -18,6 +18,7 @@ import {
 import config from 'config';
 import debugLib from 'debug';
 
+import activities from '../../constants/activities';
 import models from '../../models';
 import type OAuthAuthorizationCode from '../../models/OAuthAuthorizationCode';
 import UserToken, { TokenType } from '../../models/UserToken';
@@ -153,6 +154,15 @@ const model: OauthModel = {
       expiresAt: code.expiresAt,
       redirectUri: code.redirectUri,
       scope: Array.isArray(code.scope) ? code.scope : code.scope?.split(','),
+    });
+
+    await models.Activity.create({
+      type: activities.OAUTH_APPLICATION_AUTHORIZED,
+      UserId: user.id,
+      data: {
+        application: application.publicInfo,
+        scope: code.scope || [],
+      },
     });
 
     authorization.application = application;
