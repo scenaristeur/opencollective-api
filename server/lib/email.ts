@@ -125,8 +125,6 @@ const sendMessage = (
   html: string,
   options: SendMessageOptions = {},
 ) => {
-  options.bcc = options.bcc || 'emailbcc@opencollective.com';
-
   if (!isArray(recipients)) {
     recipients = [recipients];
   }
